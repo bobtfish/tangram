@@ -167,14 +167,14 @@ sub get_save_cache {
 
 	    push @inserts, sprintf("INSERT INTO %s\n    (%s)\nVALUES\n    (%s)",
 				   $table_name,
-				   join(', ', @meta, @$cols),
+				   join(', ', @meta, map { sprintf("`%s`", $_) } @$cols),
 				   join(', ', ('?') x (@meta + @$cols)));
 	    push @insert_fields, [ @meta_fields, @$fields ];
 
 	    if (@$cols) {
 		push @updates, sprintf("UPDATE\n    %s\nSET\n%s\nWHERE\n    %s = ?",
 				       $table_name,
-				       join(",\n", map { "    $_ = ?" } @$cols),
+				       join(",\n", map { "    `$_` = ?" } @$cols),
 				       $id_col);
 		push @update_fields, [ @$fields, 0 ];
 	    }

@@ -1,6 +1,21 @@
 
 =head1 WHAT'S NEW IN TANGRAM
 
+=head1 RELEASE 2.10_02, XXXX
+
+=over
+
+=item *
+
+Fix SQL quoting so that Tangram supports columns with the same name as SQL
+reserved words
+
+=item *
+
+Fix test suite so that correct number of tests are skipped in 03_queries.t
+
+=back
+
 =head1 RELEASE 2.10_01, 29 Jan 2007
 
 After so many contributed features, I thought it must be time for a

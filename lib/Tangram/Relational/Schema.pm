@@ -57,7 +57,7 @@ sub deploy
 
 	$do->("CREATE TABLE $table\n(\n  ",
 	      join( ",\n  ", (@base_cols,
-			      map { "$_ ".$driver->type($cols->{$_}) }
+			      map {  sprintf("`%s` %s", $_, $driver->type($cols->{$_})) }
 			      keys %$cols),
 		    ( exists $cols->{$id_col} 
 		      ? ("PRIMARY KEY( $id_col )")

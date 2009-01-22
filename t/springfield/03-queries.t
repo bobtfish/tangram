@@ -33,7 +33,7 @@ use Test::More tests => 24;
 
    $storage->disconnect();
 }
-is(&leaked, 0, "leaktest");
+is(&leaked, 0, "leaktest"); #1
 
 #--------------------
 # filter on string field
@@ -48,11 +48,11 @@ is(&leaked, 0, "leaktest");
 
    is(join( ' ', sort map { $_->{firstName} } @results ),
       'Homer Marge',
-      "filter on string field");
+      "filter on string field"); #2
 
    $storage->disconnect();
 }      
-is(&leaked, 0, "leaktest");
+is(&leaked, 0, "leaktest"); #3
 
 #--------------------
 # logical and
@@ -66,14 +66,14 @@ is(&leaked, 0, "leaktest");
 	 ($person->{firstName} eq 'Homer') &
 	 ($person->{name}      eq 'Simpson'  ) );
 
-   is( @results, 1, "Logical and");
+   is( @results, 1, "Logical and"); #4
    is ( $results[0]{firstName},
 	'Homer',
-	"Logical and" );
+	"Logical and" ); #5
 
    $storage->disconnect();
 }      
-is(&leaked, 0, "leaktest");
+is(&leaked, 0, "leaktest"); #6
 
 #--------------------
 # join on a ref link
@@ -88,14 +88,14 @@ is(&leaked, 0, "leaktest");
 	 ($person->{partner} == $partner) &
 	 ($partner->{firstName} eq 'Marge') );
 
-   is( @results, 1, "Logical and");
+   is( @results, 1, "Logical and"); #7
    is ( $results[0]{firstName},
 	'Homer',
-	"Logical and" );
+	"Logical and" ); #8
 
    $storage->disconnect();
 }      
-is(&leaked, 0, "leaktest");
+is(&leaked, 0, "leaktest"); #9
 
 #--------------------
 # two birds with one stone; test that Tangram doesn't go disconnecting
@@ -114,23 +114,23 @@ my $dbh = DBI->connect($cs, $user, $passwd)
 
    is(join( ' ', sort map { $_->{firstName} } @results ),
       'Homer Marge',
-      "!= undef test");
+      "!= undef test"); #10
 
    $storage->disconnect();
 }
-is(&leaked, 0, "leaktest");
+is(&leaked, 0, "leaktest"); #11
 
 #--------------------
 # test outer joins; only really make sense with retrieve
 
 SKIP:{
-   skip "SQLite can't do nested joins", 1
+   skip "SQLite can't do nested joins", 2
        if DBConfig->dialect =~ /sqlite/i;
 
-   skip "MySQL known to return incorrect results for nested joins", 1
+   skip "MySQL known to return incorrect results for nested joins", 2
        if DBConfig->dialect =~ /mysql/i;
 
-   skip "MySQL known to return incorrect results for nested joins", 1
+   skip "MySQL known to return incorrect results for nested joins", 2
        if DBConfig->dialect =~ /mysql/i;
 
 # first, setup some test data
@@ -186,7 +186,7 @@ SKIP:{
 	order => [ $person->{firstName} ],
 	outer_filter => ( ($person->{partner} == $partner) &
 			  ($partner->{firstName} == "Marge") ),
-	     );
+	     ); #12
 
    #$Tangram::Global = 1;
 
@@ -198,12 +198,12 @@ SKIP:{
 	order => [ $person->{firstName} ],
 	outer_filter => ($partner->{firstName} == "Marge"),
 	      force_outer => $partner
-	     );
+	     ); #13
 
    $storage->disconnect();
 }
 }
-is(&leaked, 0, "leaktest");
+is(&leaked, 0, "leaktest"); #14
 
 # here is the test for Tangram not disconnecting - this should work.
 eval {
@@ -213,7 +213,7 @@ eval {
     my @res = $sth->fetchall_arrayref;
 };
 ok(!$DBI::err,
-   "Disconnect didn't disconnect a supplied DBI handle");
+   "Disconnect didn't disconnect a supplied DBI handle"); #15
 
 #--------------------
 # BEGIN ks.perl@kurtstephens.com 2002/10/16
@@ -230,12 +230,12 @@ ok(!$DBI::err,
 	 ( $person->{person_id} <= 2 )
 	 );
    
-   is(@results, 2, "non-commutative operator argument swapping" );
+   is(@results, 2, "non-commutative operator argument swapping" ); #16
 
    $storage->disconnect();
 }      
 
-is(&leaked, 0, "leaktest");
+is(&leaked, 0, "leaktest"); #17
 # END ks.perl@kurtstephens.com 2002/10/16
 
 # test selecting some columns with no filter or object
@@ -251,7 +251,7 @@ is(&leaked, 0, "leaktest");
 	 order    => [ $person->{id} ],
        );
 
-   is(@results, 3, "no filter or object (get all IDs)" );
+   is(@results, 3, "no filter or object (get all IDs)" ); #18
 
    # now try to load them - this does really kooky stuff with
    # polymorphic selects (seemingly makes one select per subclass)
@@ -260,20 +260,20 @@ is(&leaked, 0, "leaktest");
 	 $person->{id}->in(@results),
        );
 
-   is(@objects, 3, "selected results");
-   isa_ok($_, "Person", "selected item") foreach (@objects);
+   is(@objects, 3, "selected results"); # 19
+   isa_ok($_, "Person", "selected item") foreach (@objects); #20-22
 
    # test that class_id works for classes not in schema (an empty
    # subclass test)
    @UndeadPerson::ISA = qw(NaturalPerson);
    is($storage->class_id("UndeadPerson"),
       $storage->class_id("NaturalPerson"), 
-      "Storage can handle Undead objects");
+      "Storage can handle Undead objects"); #23
 
    $storage->disconnect();
 
 }
-is(&leaked, 0, "leaktest");
+is(&leaked, 0, "leaktest"); #24
 
 
 $dbh->disconnect();
